@@ -7,13 +7,11 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
-import java.net.URI;
-
 public record PlayVideoPacket(String url, int volume, float speed, boolean stretch, float gameFadeDuration, float videoFadeDuration, boolean controls, boolean exit) implements Packet {
     @Override
     @OnlyIn(Dist.CLIENT)
     public void execClient(final Player player) {
-        WaterVisionClient.openScreen(URI.create(this.url), this.volume, this.speed, this.stretch, this.gameFadeDuration, this.videoFadeDuration, this.controls, this.exit);
+        WaterVisionClient.openScreen(WaterVisionClient.resolveUri(this.url), this.volume, this.speed, this.stretch, this.gameFadeDuration, this.videoFadeDuration, this.controls, this.exit);
     }
 
     @Override

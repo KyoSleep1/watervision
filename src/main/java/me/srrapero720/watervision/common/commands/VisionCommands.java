@@ -17,8 +17,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
-import java.net.URI;
-
 public class VisionCommands {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(Commands.literal("playvideo")
@@ -116,7 +114,7 @@ public class VisionCommands {
             final var speed = getFloatOrDefault(context, "speed", 1.0f);
             final var stretchVideo = getBoolOrDefault(context, "stretch_video", false);
 
-            WaterVisionClient.openScreen(URI.create(url), volume, speed, stretchVideo, WaterVisionClient.DEF_GAME_FADE_DURATION, WaterVisionClient.DEF_VIDEO_FADE_DURATION, true, true);
+            WaterVisionClient.openScreen(WaterVisionClient.resolveUri(url), volume, speed, stretchVideo, WaterVisionClient.DEF_GAME_FADE_DURATION, WaterVisionClient.DEF_VIDEO_FADE_DURATION, true, true);
             return 0;
         } catch (final Exception e) {
             context.getSource().sendFailure(Component.literal("Failed to open video screen, see log for more details"));
@@ -131,7 +129,7 @@ public class VisionCommands {
         try {
             final var url = StringArgumentType.getString(context, "url");
 
-            WaterVisionClient.openOverlay(URI.create(url));
+            WaterVisionClient.openOverlay(WaterVisionClient.resolveUri(url));
             return 0;
         } catch (Exception e) {
             context.getSource().sendFailure(Component.literal("Failed to open video screen, see console for more details"));

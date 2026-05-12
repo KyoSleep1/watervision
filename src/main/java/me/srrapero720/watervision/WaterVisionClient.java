@@ -11,7 +11,12 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.joml.Matrix4f;
 
+import java.net.URISyntaxException;
 import java.net.URI;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Locale;
+import java.util.regex.Pattern;
 
 public class WaterVisionClient {
     public static final int DEF_VOLUME = 100;
@@ -21,6 +26,7 @@ public class WaterVisionClient {
     public static final float DEF_VIDEO_FADE_DURATION = 20.0f;
     public static final boolean DEF_CONTROLS = true;
     public static final boolean DEF_EXIT = true;
+    private static final Pattern WINDOWS_ABSOLUTE_PATH = Pattern.compile("^[a-zA-Z]:[\\\\/].*");
 
 
     @OnlyIn(Dist.CLIENT)
@@ -43,6 +49,37 @@ public class WaterVisionClient {
     @OnlyIn(Dist.CLIENT)
     public static void closeOverlay() {
         VisionOverlay.uri = null;
+    }
+
+    @OnlyIn(Dist.CLIENT)
+    public static URI resolveUri(final String value) {
+        if (value == null || value.isBlank()) {
+            throw new IllegalArgumentException("Video path cannot be empty");
+        }
+
+        final String trimmed = value.trim();
+        if (trimmed.startsWith("\\\\")) {
+            return Path.of(trimmed).toUri();
+        }
+
+        if (WINDOWS_ABSOLUTE_PATH.matcher(trimmed).matches()) {
+            return Path.of(trimmed).toUri();
+        }
+
+        try {
+            final URI uri = new URI(trimmed);
+            if (uri.getScheme() != null) {
+                final String scheme = uri.getScheme().toLowerCase(Locale.ROOT);
+                if (scheme.length() > 1 || "file".equals(scheme)) {
+                    return uri;
+                }
+            }
+        } catch (URISyntaxException ignored) {
+            // Fall through to local path resolution.
+        }
+
+        final Path gameDirectory = Minecraft.getInstance().gameDirectory.toPath().toAbsolutePath().normalize();
+        return gameDirectory.resolve(Paths.get(trimmed)).normalize().toUri();
     }
 
     @OnlyIn(Dist.CLIENT)

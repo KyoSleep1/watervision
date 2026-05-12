@@ -5,13 +5,11 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 
-import java.net.URI;
-
 public record PlayVideoOverlayPacket(String url) implements Packet {
 
     @Override
     public void execClient(Player player) {
-        WaterVisionClient.openOverlay(URI.create(this.url));
+        WaterVisionClient.openOverlay(WaterVisionClient.resolveUri(this.url));
     }
 
     @Override
