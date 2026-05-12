@@ -8,9 +8,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 
-import java.net.URI;
-import java.util.function.Function;
-
 import static me.srrapero720.watervision.WaterVision.ID;
 
 public record PlayVideoOverlayPacket(String url) implements Packet {
@@ -18,7 +15,7 @@ public record PlayVideoOverlayPacket(String url) implements Packet {
 
     @Override
     public void execClient(Player player) {
-        WaterVisionClient.openOverlay(URI.create(this.url));
+        WaterVisionClient.openOverlay(this.url);
     }
 
     @Override

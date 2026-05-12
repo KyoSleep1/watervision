@@ -26,8 +26,6 @@ import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 
-import java.net.URI;
-
 public class VisionCommands {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(Commands.literal("playvideo")
@@ -133,7 +131,7 @@ public class VisionCommands {
                     throw new RuntimeException(e);
                 }
                 Minecraft.getInstance().execute(() -> {
-                    WaterVisionClient.openScreen(URI.create(url), volume, speed, stretchVideo, WaterVisionClient.DEF_GAME_FADE_DURATION, WaterVisionClient.DEF_VIDEO_FADE_DURATION, true, true);
+                    WaterVisionClient.openScreen(url, volume, speed, stretchVideo, WaterVisionClient.DEF_GAME_FADE_DURATION, WaterVisionClient.DEF_VIDEO_FADE_DURATION, true, true);
                 });
             }).start();
             return 0;
@@ -150,7 +148,7 @@ public class VisionCommands {
         try {
             final var url = StringArgumentType.getString(context, "url");
 
-            WaterVisionClient.openOverlay(URI.create(url));
+            WaterVisionClient.openOverlay(url);
             return 0;
         } catch (Throwable e) {
             context.getSource().sendError(Component.literal("Failed to open video screen, see console for more details"));

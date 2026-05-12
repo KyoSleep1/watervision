@@ -20,6 +20,8 @@ import org.joml.Matrix4f;
 import org.watermedia.api.image.ImageAPI;
 
 import java.net.URI;
+import java.nio.file.Path;
+import java.util.Locale;
 
 public class WaterVisionClient implements ClientModInitializer {
     public static final int DEF_VOLUME = 100;
@@ -56,6 +58,11 @@ public class WaterVisionClient implements ClientModInitializer {
     }
 
     @Environment(EnvType.CLIENT)
+    public static void openScreen(final String location, final int volume, final float speed, final boolean stretchVideo, final float gameFadeDuration, final float videoFadeDuration, final boolean controls, final boolean exit) {
+        openScreen(resolveMediaUri(location), volume, speed, stretchVideo, gameFadeDuration, videoFadeDuration, controls, exit);
+    }
+
+    @Environment(EnvType.CLIENT)
     public static void closeScreen() {
         if (Minecraft.getInstance().screen instanceof VisionScreen) {
             Minecraft.getInstance().setScreen(null);
@@ -65,6 +72,11 @@ public class WaterVisionClient implements ClientModInitializer {
     @Environment(EnvType.CLIENT)
     public static void openOverlay(final URI uri) {
         VisionOverlay.uri = uri;
+    }
+
+    @Environment(EnvType.CLIENT)
+    public static void openOverlay(final String location) {
+        openOverlay(resolveMediaUri(location));
     }
 
     @Environment(EnvType.CLIENT)
@@ -99,5 +111,54 @@ public class WaterVisionClient implements ClientModInitializer {
         bufferbuilder.vertex(matrix4f, pX2, pY1, pBlitOffset).uv(pMaxU, pMinV).endVertex();
         BufferUploader.drawWithShader(bufferbuilder.end());
         RenderSystem.disableBlend();
+    }
+
+    private static URI resolveMediaUri(final String location) {
+        if (location == null) {
+            throw new IllegalArgumentException("Media location cannot be null");
+        }
+
+        final String normalized = location.trim();
+        if (normalized.isEmpty()) {
+            throw new IllegalArgumentException("Media location cannot be empty");
+        }
+
+        if (isWindowsAbsolutePath(normalized) || normalized.startsWith("\\\\")) {
+            return Path.of(normalized).toAbsolutePath().normalize().toUri();
+        }
+
+        if (hasUriScheme(normalized)) {
+            return URI.create(normalized);
+        }
+
+        return Path.of(System.getProperty("user.dir")).resolve(normalized).normalize().toUri();
+    }
+
+    private static boolean hasUriScheme(final String location) {
+        final int schemeSeparator = location.indexOf(':');
+        if (schemeSeparator <= 0) {
+            return false;
+        }
+
+        final String scheme = location.substring(0, schemeSeparator).toLowerCase(Locale.ROOT);
+        if (scheme.length() == 1) {
+            return false;
+        }
+
+        for (int i = 0; i < scheme.length(); i++) {
+            final char c = scheme.charAt(i);
+            if ((c < 'a' || c > 'z') && (c < '0' || c > '9') && c != '+' && c != '-' && c != '.') {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private static boolean isWindowsAbsolutePath(final String location) {
+        return location.length() > 2
+                && Character.isLetter(location.charAt(0))
+                && location.charAt(1) == ':'
+                && (location.charAt(2) == '\\' || location.charAt(2) == '/');
     }
 }

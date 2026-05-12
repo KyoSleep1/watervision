@@ -9,8 +9,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 
-import java.net.URI;
-
 import static me.srrapero720.watervision.WaterVision.ID;
 
 public record PlayVideoPacket(String url, int volume, float speed, boolean stretch, float gameFadeDuration, float videoFadeDuration, boolean controls, boolean exit) implements Packet {
@@ -20,7 +18,7 @@ public record PlayVideoPacket(String url, int volume, float speed, boolean stret
     @Override
     @Environment(EnvType.CLIENT)
     public void execClient(final Player player) {
-        WaterVisionClient.openScreen(URI.create(this.url), this.volume, this.speed, this.stretch, this.gameFadeDuration, this.videoFadeDuration, this.controls, this.exit);
+        WaterVisionClient.openScreen(this.url, this.volume, this.speed, this.stretch, this.gameFadeDuration, this.videoFadeDuration, this.controls, this.exit);
     }
 
     @Override
